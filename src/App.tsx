@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { PageLoading } from './components/ui/Loading'
 import { AuthProvider } from './context/AuthContext'
@@ -29,10 +29,10 @@ const FieldWorkerApp=lazy(()=>import('./pages/field/FieldWorkerApp').then(m=>({d
 const RecyclingPartner=lazy(()=>import('./pages/partner/RecyclingPartner').then(m=>({default:m.RecyclingPartner})))
 const AdminConsole=lazy(()=>import('./pages/admin/AdminConsole').then(m=>({default:m.AdminConsole})))
 
-export default function App(){return <BrowserRouter><AuthProvider><DataProvider><Suspense fallback={<PageLoading/>}><Routes>
+export default function App(){return <HashRouter><AuthProvider><DataProvider><Suspense fallback={<PageLoading/>}><Routes>
   <Route path="/" element={<LandingPage/>}/><Route path="/login" element={<LoginPage/>}/><Route path="/signup" element={<SignUpPage/>}/><Route path="/privacy" element={<PrivacyPage/>}/>
   <Route path="/app" element={<ProtectedRoute roles={['CITIZEN']}><CitizenLayout/></ProtectedRoute>}><Route index element={<CitizenHome/>}/><Route path="report" element={<ReportFlow/>}/><Route path="reports" element={<MyReports/>}/><Route path="reports/:id" element={<CitizenIncidentDetail/>}/><Route path="nearby" element={<NearbyIssues/>}/></Route>
   <Route path="/command" element={<ProtectedRoute roles={['MUNICIPAL_OFFICER','ADMIN']}><CommandLayout/></ProtectedRoute>}><Route index element={<Overview/>}/><Route path="incidents" element={<PriorityQueue all/>}/><Route path="priority" element={<PriorityQueue/>}/><Route path="incidents/:id" element={<IncidentDetail/>}/><Route path="map" element={<CityMap/>}/><Route path="clusters" element={<DuplicateClusters/>}/><Route path="teams" element={<Resources type="teams"/>}/><Route path="vehicles" element={<Resources type="vehicles"/>}/><Route path="hotspots" element={<Hotspots/>}/><Route path="analytics" element={<Analytics/>}/><Route path="settings" element={<Settings/>}/></Route>
   <Route path="/field" element={<ProtectedRoute roles={['FIELD_WORKER']}><FieldWorkerApp/></ProtectedRoute>}/><Route path="/recycler" element={<ProtectedRoute roles={['RECYCLING_PARTNER']}><RecyclingPartner/></ProtectedRoute>}/><Route path="/admin" element={<ProtectedRoute roles={['ADMIN']}><AdminConsole/></ProtectedRoute>}/>
   <Route path="*" element={<Navigate to="/" replace/>}/>
-</Routes></Suspense></DataProvider></AuthProvider></BrowserRouter>}
+</Routes></Suspense></DataProvider></AuthProvider></HashRouter>}

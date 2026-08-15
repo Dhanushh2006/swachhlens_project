@@ -6,6 +6,7 @@ export const timeAgo = (date: string) => formatDistanceToNow(new Date(date), { a
 export const shortDate = (date: string) => format(new Date(date), 'dd MMM, HH:mm')
 export const pct = (value: number) => `${Math.round(value * 100)}%`
 export const formatStatus = (value: string) => value.toLowerCase().replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
+export const publicAsset = (path: string) => /^(data:|blob:|https?:)/.test(path) ? path : `${import.meta.env.BASE_URL}${path.replace(/^\//,'')}`
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

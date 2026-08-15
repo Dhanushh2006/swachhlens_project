@@ -10,15 +10,15 @@ import { useData } from '../../context/DataContext'
 import { calculateActionScore } from '../../services/decisionEngine'
 import { createWasteAnalyzer } from '../../services/aiService'
 import { detectDuplicate } from '../../services/duplicateService'
-import { mediaFileToDataUrl, pct } from '../../lib/utils'
+import { mediaFileToDataUrl, pct, publicAsset } from '../../lib/utils'
 import type { AIAnalysis, SensitivityLevel, WasteCategory } from '../../types/domain'
 
 type Step = 'capture' | 'analyzing' | 'review' | 'submitting' | 'done'
 interface Scenario { title: string; category: WasteCategory; image: string; description: string; sensitivity: SensitivityLevel; reason: string }
 const scenarios: Scenario[] = [
-  { title: 'Overflowing bin', category: 'Overflowing bin', image: '/demo/overflowing-bin.jpg', description: 'Medium overflowing bin beside residential walkway', sensitivity: 'MEDIUM', reason: 'Residential zone' },
-  { title: 'Critical debris', category: 'Construction debris', image: '/demo/construction-debris.jpg', description: 'Large construction debris blocking drain near school', sensitivity: 'HIGH', reason: 'Fictional Shantivan School (86m)' },
-  { title: 'Hazardous waste', category: 'Hazardous waste', image: '/demo/hazardous-waste.jpg', description: 'Leaking chemical containers require urgent response', sensitivity: 'MEDIUM', reason: 'Service road' },
+  { title: 'Overflowing bin', category: 'Overflowing bin', image: publicAsset('/demo/overflowing-bin.jpg'), description: 'Medium overflowing bin beside residential walkway', sensitivity: 'MEDIUM', reason: 'Residential zone' },
+  { title: 'Critical debris', category: 'Construction debris', image: publicAsset('/demo/construction-debris.jpg'), description: 'Large construction debris blocking drain near school', sensitivity: 'HIGH', reason: 'Fictional Shantivan School (86m)' },
+  { title: 'Hazardous waste', category: 'Hazardous waste', image: publicAsset('/demo/hazardous-waste.jpg'), description: 'Leaking chemical containers require urgent response', sensitivity: 'MEDIUM', reason: 'Service road' },
 ]
 const progressLabels = ['Image received','Detecting waste','Estimating visible volume','Checking hazards','Checking nearby reports','Calculating response priority']
 

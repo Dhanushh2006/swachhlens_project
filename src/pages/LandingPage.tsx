@@ -2,6 +2,7 @@ import { ArrowRight, BrainCircuit, Camera, CheckCircle2, Route, ShieldCheck, Spa
 import { Link } from 'react-router-dom'
 import { Logo } from '../components/brand/Logo'
 import { Button } from '../components/ui/Button'
+import { publicAsset } from '../lib/utils'
 
 export function LandingPage() {
   return <main className="min-h-screen bg-[#f7faf8]">
@@ -17,7 +18,7 @@ export function LandingPage() {
         </div>
         <div className="relative mx-auto w-full max-w-lg">
           <div className="overflow-hidden rounded-3xl border border-white/15 bg-white text-ink shadow-2xl">
-            <img src="/demo/construction-debris.jpg" className="h-60 w-full object-cover" alt="Demo construction debris incident"/>
+            <img src={publicAsset('/demo/construction-debris.jpg')} className="h-60 w-full object-cover" alt="Demo construction debris incident"/>
             <div className="p-5"><div className="flex items-center justify-between"><span className="text-xs font-extrabold uppercase tracking-widest text-red-600">Critical incident</span><span className="text-xs font-bold text-slate-500">SW-2048</span></div><div className="mt-3 flex items-end justify-between"><div><h2 className="text-xl font-black">Construction debris</h2><p className="mt-1 text-sm text-slate-500">Large · Drain blockage · Near school</p></div><div className="text-right"><div className="text-3xl font-black text-red-600">94</div><div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">ActionScore</div></div></div><div className="mt-4 rounded-xl bg-forest-50 p-3 text-sm"><b className="text-forest-800">ResponseMatch™</b><p className="mt-1 text-slate-600">Mini truck + 3 workers · Immediate escalation</p></div></div>
           </div>
           <div className="absolute -bottom-5 -left-5 hidden rounded-xl border border-slate-200 bg-white p-3 shadow-lift sm:block"><p className="text-[10px] font-bold uppercase text-slate-400">Duplicate intelligence</p><p className="mt-1 font-black text-forest-800">12 reports → 1 response</p></div>

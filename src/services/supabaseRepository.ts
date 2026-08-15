@@ -1,5 +1,6 @@
 import { STATUS_FLOW } from '../config/decisionRules'
 import { supabase } from '../lib/supabase'
+import { publicAsset } from '../lib/utils'
 import type { AIAnalysis, AppState, CleanupVerification, Incident, IncidentStatus, NewReportInput, PriorityLevel, SensitivityLevel, VolumeCategory, WasteCategory } from '../types/domain'
 
 const client = () => {
@@ -9,11 +10,11 @@ const client = () => {
 
 function fallbackImage(category: WasteCategory) {
   const map: Partial<Record<WasteCategory,string>> = {
-    'Construction debris':'/demo/construction-debris.jpg','Overflowing bin':'/demo/overflowing-bin.jpg','Hazardous waste':'/demo/hazardous-waste.jpg',
-    'Plastic waste':'/demo/plastic-waste.jpg','Organic waste':'/demo/organic-market.jpg','Drain blockage':'/demo/construction-debris.jpg',
-    'Garbage dump':'/demo/overflowing-bin.jpg','E-waste':'/demo/hazardous-waste.jpg',
+    'Construction debris':publicAsset('/demo/construction-debris.jpg'),'Overflowing bin':publicAsset('/demo/overflowing-bin.jpg'),'Hazardous waste':publicAsset('/demo/hazardous-waste.jpg'),
+    'Plastic waste':publicAsset('/demo/plastic-waste.jpg'),'Organic waste':publicAsset('/demo/organic-market.jpg'),'Drain blockage':publicAsset('/demo/construction-debris.jpg'),
+    'Garbage dump':publicAsset('/demo/overflowing-bin.jpg'),'E-waste':publicAsset('/demo/hazardous-waste.jpg'),
   }
-  return map[category] ?? '/demo/overflowing-bin.jpg'
+  return map[category] ?? publicAsset('/demo/overflowing-bin.jpg')
 }
 
 const responseFrom = (value: Record<string,unknown> = {}) => ({

@@ -1,18 +1,19 @@
 import { calculateActionScore, generateResponse } from '../services/decisionEngine'
+import { publicAsset } from '../lib/utils'
 import type { AppState, Incident, IncidentStatus, PriorityLevel, SensitivityLevel, VolumeCategory, WasteCategory } from '../types/domain'
 
 const NOW = new Date()
 const isoAgo = (hours: number) => new Date(NOW.getTime() - hours * 36e5).toISOString()
 
 const imageFor: Partial<Record<WasteCategory, string>> = {
-  'Construction debris': '/demo/construction-debris.jpg',
-  'Overflowing bin': '/demo/overflowing-bin.jpg',
-  'Hazardous waste': '/demo/hazardous-waste.jpg',
-  'Plastic waste': '/demo/plastic-waste.jpg',
-  'Organic waste': '/demo/organic-market.jpg',
-  'Drain blockage': '/demo/construction-debris.jpg',
-  'Garbage dump': '/demo/overflowing-bin.jpg',
-  'E-waste': '/demo/hazardous-waste.jpg',
+  'Construction debris': publicAsset('/demo/construction-debris.jpg'),
+  'Overflowing bin': publicAsset('/demo/overflowing-bin.jpg'),
+  'Hazardous waste': publicAsset('/demo/hazardous-waste.jpg'),
+  'Plastic waste': publicAsset('/demo/plastic-waste.jpg'),
+  'Organic waste': publicAsset('/demo/organic-market.jpg'),
+  'Drain blockage': publicAsset('/demo/construction-debris.jpg'),
+  'Garbage dump': publicAsset('/demo/overflowing-bin.jpg'),
+  'E-waste': publicAsset('/demo/hazardous-waste.jpg'),
 }
 
 interface SeedIncident {
@@ -36,7 +37,7 @@ function buildIncident(spec: SeedIncident): Incident {
       ? { volume: 25, locationSensitivity: 25, reportFrequency: 20, complaintAge: 14, hazardContext: 10 }
       : calculated.breakdown,
     priorityLevel: spec.priority ?? calculated.priority, locationSensitivity: spec.sensitivity, sensitivityReason: spec.sensitivityReason,
-    reportCount: spec.reports, mediaUrl: spec.media ?? imageFor[spec.category] ?? '/demo/overflowing-bin.jpg', afterMediaUrl: spec.afterMediaUrl,
+    reportCount: spec.reports, mediaUrl: spec.media ?? imageFor[spec.category] ?? publicAsset('/demo/overflowing-bin.jpg'), afterMediaUrl: spec.afterMediaUrl,
     analysis: {
       id: `ai-${spec.id}`, categories: [{ category: spec.category, confidence: spec.id === 'SW-2048' ? 0.94 : 0.86 + (Number(spec.id.slice(-1)) % 9) / 100 }],
       volumeCategory: spec.volume, volumeConfidence: spec.id === 'SW-2048' ? 0.82 : 0.8 + (Number(spec.id.slice(-1)) % 7) / 100,
@@ -60,17 +61,17 @@ const incidentSpecs: SeedIncident[] = [
   { id: 'SW-2052', category: 'Plastic waste', volume: 'Large', sensitivity: 'HIGH', sensitivityReason: 'Urban water channel (demo)', reports: 5, age: 18, hazards: ['Water-flow obstruction'], status: 'DISPATCHED', address: 'Canal Walk North · Demo City', lat: 12.9781, lng: 77.5911, description: 'Plastic packaging accumulated along the channel edge.', score: 90, priority: 'CRITICAL' },
   { id: 'SW-2053', category: 'Garbage dump', volume: 'Very Large', sensitivity: 'MEDIUM', sensitivityReason: 'Major road', reports: 12, age: 15, hazards: ['Traffic visibility risk'], status: 'PRIORITIZED', address: 'Ring Road Underpass · Demo City', lat: 12.9655, lng: 77.6038, description: 'Repeated mixed waste reports at the underpass.', score: 89, priority: 'CRITICAL' },
   { id: 'SW-2054', category: 'E-waste', volume: 'Small', sensitivity: 'MEDIUM', sensitivityReason: 'Residential zone', reports: 1, age: 5, hazards: ['Battery handling risk'], status: 'ACCEPTED', address: 'Meadow Block C · Demo City', lat: 12.9732, lng: 77.5863, description: 'Discarded monitors, cables and batteries on pavement.', score: 55, priority: 'MEDIUM' },
-  { id: 'SW-2055', category: 'Overflowing bin', volume: 'Medium', sensitivity: 'HIGH', sensitivityReason: 'Fictional City Hospital (74m)', reports: 4, age: 22, status: 'VERIFICATION', address: 'Health District Entry · Demo City', lat: 12.9812, lng: 77.5977, description: 'Bin beside pedestrian entrance; cleanup evidence submitted.', score: 73, priority: 'HIGH', afterMediaUrl: '/demo/cleanup-verified.jpg' },
+  { id: 'SW-2055', category: 'Overflowing bin', volume: 'Medium', sensitivity: 'HIGH', sensitivityReason: 'Fictional City Hospital (74m)', reports: 4, age: 22, status: 'VERIFICATION', address: 'Health District Entry · Demo City', lat: 12.9812, lng: 77.5977, description: 'Bin beside pedestrian entrance; cleanup evidence submitted.', score: 73, priority: 'HIGH', afterMediaUrl: publicAsset('/demo/cleanup-verified.jpg') },
   { id: 'SW-2056', category: 'Drain blockage', volume: 'Medium', sensitivity: 'HIGH', sensitivityReason: 'Major road', reports: 6, age: 9, hazards: ['Standing water', 'Water-flow obstruction'], status: 'ON_SITE', address: 'Monsoon Avenue Junction · Demo City', lat: 12.9638, lng: 77.5941, description: 'Drain blocked with mixed litter after rainfall.', score: 87, priority: 'CRITICAL' },
   { id: 'SW-2057', category: 'Plastic waste', volume: 'Small', sensitivity: 'LOW', sensitivityReason: 'Residential zone', reports: 1, age: 0.8, status: 'PRIORITIZED', address: 'Garden Street · Demo City', lat: 12.9681, lng: 77.5842, description: 'Plastic bottles and wrappers beside the curb.' },
   { id: 'SW-2058', category: 'Organic waste', volume: 'Medium', sensitivity: 'MEDIUM', sensitivityReason: 'Bus stand', reports: 3, age: 6, hazards: ['Pest and hygiene risk'], status: 'CLEANUP_IN_PROGRESS', address: 'West Bus Stand · Demo City', lat: 12.9749, lng: 77.6073, description: 'Food waste behind the vendor line.' },
   { id: 'SW-2059', category: 'Construction debris', volume: 'Small', sensitivity: 'LOW', sensitivityReason: 'Residential zone', reports: 1, age: 2.2, status: 'PRIORITIZED', address: 'School Lane South · Demo City', lat: 12.9725, lng: 77.5955, description: 'Supporting brick and tile report near the school drain.', duplicateMasterId: 'SW-2048' },
-  { id: 'SW-2060', category: 'Garbage dump', volume: 'Large', sensitivity: 'MEDIUM', sensitivityReason: 'Market approach road', reports: 8, age: 30, hazards: ['Pest and hygiene risk'], status: 'RESOLVED', address: 'Old Market Approach · Demo City', lat: 12.9673, lng: 77.6121, description: 'Recurring mixed waste pile now cleared.', afterMediaUrl: '/demo/cleanup-verified.jpg' },
-  { id: 'SW-2061', category: 'Overflowing bin', volume: 'Small', sensitivity: 'LOW', sensitivityReason: 'Residential zone', reports: 1, age: 4, status: 'RESOLVED', address: 'Palm Grove 1st Cross · Demo City', lat: 12.9841, lng: 77.5884, description: 'Small public bin overflow was cleared.', afterMediaUrl: '/demo/cleanup-verified.jpg' },
+  { id: 'SW-2060', category: 'Garbage dump', volume: 'Large', sensitivity: 'MEDIUM', sensitivityReason: 'Market approach road', reports: 8, age: 30, hazards: ['Pest and hygiene risk'], status: 'RESOLVED', address: 'Old Market Approach · Demo City', lat: 12.9673, lng: 77.6121, description: 'Recurring mixed waste pile now cleared.', afterMediaUrl: publicAsset('/demo/cleanup-verified.jpg') },
+  { id: 'SW-2061', category: 'Overflowing bin', volume: 'Small', sensitivity: 'LOW', sensitivityReason: 'Residential zone', reports: 1, age: 4, status: 'RESOLVED', address: 'Palm Grove 1st Cross · Demo City', lat: 12.9841, lng: 77.5884, description: 'Small public bin overflow was cleared.', afterMediaUrl: publicAsset('/demo/cleanup-verified.jpg') },
   { id: 'SW-2062', category: 'Hazardous waste', volume: 'Small', sensitivity: 'MEDIUM', sensitivityReason: 'Light industrial zone', reports: 1, age: 1.2, hazards: ['Sharp material risk'], status: 'AI_ANALYZED', address: 'Workshop Lane · Demo City', lat: 12.9584, lng: 77.6004, description: 'Broken fluorescent tubes near loading gate.', score: 76, priority: 'HIGH' },
-  { id: 'SW-2063', category: 'Plastic waste', volume: 'Medium', sensitivity: 'MEDIUM', sensitivityReason: 'Major road', reports: 4, age: 10, status: 'RESOLVED', address: 'East Flyover Base · Demo City', lat: 12.9771, lng: 77.6144, description: 'Segregated plastic pile collected by recovery team.', afterMediaUrl: '/demo/cleanup-verified.jpg' },
+  { id: 'SW-2063', category: 'Plastic waste', volume: 'Medium', sensitivity: 'MEDIUM', sensitivityReason: 'Major road', reports: 4, age: 10, status: 'RESOLVED', address: 'East Flyover Base · Demo City', lat: 12.9771, lng: 77.6144, description: 'Segregated plastic pile collected by recovery team.', afterMediaUrl: publicAsset('/demo/cleanup-verified.jpg') },
   { id: 'SW-2064', category: 'E-waste', volume: 'Medium', sensitivity: 'LOW', sensitivityReason: 'Commercial zone', reports: 2, age: 12, hazards: ['Battery handling risk'], status: 'ASSIGNED', address: 'Tech Arcade Rear Gate · Demo City', lat: 12.9861, lng: 77.6048, description: 'Old printers and computer components require recovery.' },
-  { id: 'SW-2065', category: 'Drain blockage', volume: 'Large', sensitivity: 'HIGH', sensitivityReason: 'Fictional Vidya School (95m)', reports: 5, age: 26, hazards: ['Standing water'], status: 'RESOLVED', address: 'Vidya Road South · Demo City', lat: 12.9568, lng: 77.5931, description: 'Drain obstruction cleared before school opening.', afterMediaUrl: '/demo/cleanup-verified.jpg' },
+  { id: 'SW-2065', category: 'Drain blockage', volume: 'Large', sensitivity: 'HIGH', sensitivityReason: 'Fictional Vidya School (95m)', reports: 5, age: 26, hazards: ['Standing water'], status: 'RESOLVED', address: 'Vidya Road South · Demo City', lat: 12.9568, lng: 77.5931, description: 'Drain obstruction cleared before school opening.', afterMediaUrl: publicAsset('/demo/cleanup-verified.jpg') },
   { id: 'SW-2066', category: 'Organic waste', volume: 'Small', sensitivity: 'MEDIUM', sensitivityReason: 'Market', reports: 1, age: 1, status: 'REPORTED', address: 'Flower Market Exit · Demo City', lat: 12.9705, lng: 77.6091, description: 'Flower and leaf waste on service pavement.' },
   { id: 'SW-2067', category: 'Garbage dump', volume: 'Medium', sensitivity: 'MEDIUM', sensitivityReason: 'Major road', reports: 1, age: 3, status: 'PRIORITIZED', address: 'Ring Road Underpass West · Demo City', lat: 12.9650, lng: 77.6043, description: 'Supporting mixed-waste report at the same underpass.', duplicateMasterId: 'SW-2053' },
 ]
@@ -110,8 +111,8 @@ export function createDemoState(): AppState {
       { id: 'DC-0184', masterIncidentId: 'SW-2048', memberIncidentIds: ['SW-2048', 'SW-2059'], similarityScore: 0.84, detectionReason: ['Construction debris category', 'Within 118m', 'Similar visible material'], createdAt: isoAgo(9) },
     ],
     verifications: [
-      { id: 'verify-2060', incidentId: 'SW-2060', afterMediaPath: '/demo/cleanup-verified.jpg', verificationStatus: 'VERIFIED', confidence: 0.93, remainingWasteIndicator: 'LOW', createdAt: isoAgo(3) },
-      { id: 'verify-2055', incidentId: 'SW-2055', afterMediaPath: '/demo/cleanup-verified.jpg', verificationStatus: 'VERIFIED', confidence: 0.93, remainingWasteIndicator: 'LOW', createdAt: isoAgo(0.5) },
+      { id: 'verify-2060', incidentId: 'SW-2060', afterMediaPath: publicAsset('/demo/cleanup-verified.jpg'), verificationStatus: 'VERIFIED', confidence: 0.93, remainingWasteIndicator: 'LOW', createdAt: isoAgo(3) },
+      { id: 'verify-2055', incidentId: 'SW-2055', afterMediaPath: publicAsset('/demo/cleanup-verified.jpg'), verificationStatus: 'VERIFIED', confidence: 0.93, remainingWasteIndicator: 'LOW', createdAt: isoAgo(0.5) },
     ],
     notifications: [
       { id: 'note-1', userId: 'demo-officer', title: 'Critical incident near school', message: 'SW-2048 scored 94/100. Drain blockage is visible near a sensitive location.', type: 'CRITICAL', read: false, createdAt: isoAgo(0.3) },
