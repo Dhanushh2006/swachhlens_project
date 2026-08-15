@@ -19,9 +19,10 @@ create table public.profiles (
   updated_at timestamptz not null default now()
 );
 
+create sequence public.incident_display_seq start with 2048;
 create table public.incidents (
   id uuid primary key default gen_random_uuid(),
-  display_id text unique not null default ('SW-' || floor(2000 + random() * 7000)::int::text),
+  display_id text unique not null default ('SW-' || nextval('public.incident_display_seq')::text),
   reporter_id uuid references public.profiles(id) on delete set null,
   latitude double precision not null check (latitude between -90 and 90),
   longitude double precision not null check (longitude between -180 and 180),
@@ -68,7 +69,7 @@ create table public.ai_analyses (
 
 create table public.duplicate_clusters (
   id uuid primary key default gen_random_uuid(),
-  master_incident_id uuid not null references public.incidents(id) on delete cascade,
+  master_incident_id uuid not null unique references public.incidents(id) on delete cascade,
   similarity_score numeric(4,3) not null check (similarity_score between 0 and 1),
   detection_reason jsonb not null,
   created_at timestamptz not null default now()

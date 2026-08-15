@@ -40,7 +40,7 @@ async function writeState(state: AppState): Promise<void> {
 export const demoDb = {
   async load(): Promise<AppState> {
     const stored = await readState()
-    if (stored?.version === 1 && stored.incidents?.length >= 20) return stored
+    if (stored?.version === 3 && stored.incidents?.length >= 20) return stored
     const seeded = createDemoState()
     await writeState(seeded)
     return seeded

@@ -82,7 +82,7 @@ create policy events_worker_insert on public.incident_status_events for insert w
 create policy events_operations_all on public.incident_status_events for all using (public.is_operations_role()) with check (public.is_operations_role());
 
 insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types) values
-('incident-media','incident-media',false,8388608,array['image/jpeg','image/png','image/webp','video/mp4']),
+('incident-media','incident-media',false,8388608,array['image/jpeg','image/png','image/webp','video/mp4','video/webm']),
 ('cleanup-evidence','cleanup-evidence',false,8388608,array['image/jpeg','image/png','image/webp'])
 on conflict (id) do nothing;
 create policy storage_incident_insert on storage.objects for insert to authenticated with check (bucket_id='incident-media' and (storage.foldername(name))[1]=auth.uid()::text);

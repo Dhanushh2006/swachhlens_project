@@ -32,7 +32,7 @@ export function detectDuplicate(input: { latitude: number; longitude: number; ca
       ...(hours <= DUPLICATE_WINDOW_HOURS ? [`Reported within ${Math.max(1, Math.round(hours))} hours`] : []),
       ...(score >= 0.75 ? ['High prototype visual similarity'] : []),
     ]
-    return { probability: Math.min(0.96, score + (score >= 0.75 ? 0.07 : 0)), matchingIncidentId: incident.id, reasons, distanceMeters: distance }
+    return { probability: Math.min(0.96, score + (score >= 0.75 ? 0.07 : 0)), matchingIncidentId: incident.duplicateMasterId ?? incident.id, reasons, distanceMeters: distance }
   }).filter((candidate) => candidate.probability >= 0.7)
   return candidates.sort((a, b) => b.probability - a.probability)[0] ?? null
 }

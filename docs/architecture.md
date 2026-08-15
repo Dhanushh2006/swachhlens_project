@@ -37,7 +37,7 @@ Password-free role buttons explicitly start a demo session. Operational state is
 ## End-to-end report sequence
 
 1. Browser requests camera and GPS only after a user action.
-2. Media is validated (image MIME, 8 MB maximum).
+2. Photo/video media is validated (JPG/PNG/WebP/MP4/WebM, 8 MB maximum).
 3. `WasteAnalyzer` selects the Edge Function adapter or deterministic adapter.
 4. Duplicate service compares proximity, capture window and category; image similarity remains an adapter boundary.
 5. ActionScore and ResponseMatch return structured, explainable output.

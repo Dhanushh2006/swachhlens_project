@@ -28,7 +28,7 @@ language plpgsql security definer set search_path=public as $$
 declare result public.assignments;
 begin
   if not public.is_operations_role() then raise exception 'Not authorized'; end if;
-  if not exists(select 1 from incidents where id=target_incident and status='PRIORITIZED' for update) then raise exception 'Incident is not ready for assignment'; end if;
+  if not exists(select 1 from incidents where id=target_incident and status='PRIORITIZED' and duplicate_master_id is null for update) then raise exception 'Incident is not ready for assignment'; end if;
   if not exists(select 1 from teams where id=target_team and availability='AVAILABLE' for update) then raise exception 'Team unavailable'; end if;
   if not exists(select 1 from vehicles where id=target_vehicle and availability='AVAILABLE' for update) then raise exception 'Vehicle unavailable'; end if;
   insert into assignments(incident_id,team_id,vehicle_id,assigned_by) values(target_incident,target_team,target_vehicle,auth.uid()) returning * into result;

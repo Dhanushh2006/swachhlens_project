@@ -71,6 +71,7 @@ export interface Incident {
   sensitivityReason: string
   reportCount: number
   mediaUrl: string
+  mediaType?: 'image' | 'video'
   afterMediaUrl?: string
   analysis: AIAnalysis
   duplicateMasterId?: string
@@ -156,6 +157,14 @@ export interface Hotspot {
   recommendation: string
 }
 
+export interface WasteCategoryConfig {
+  id: string
+  name: WasteCategory
+  active: boolean
+  handlingNotes: string
+  sortOrder: number
+}
+
 export interface AuditLog {
   id: string
   userId: string
@@ -167,6 +176,7 @@ export interface AuditLog {
 }
 
 export interface AppState {
+  profiles: Profile[]
   incidents: Incident[]
   teams: Team[]
   vehicles: Vehicle[]
@@ -175,6 +185,7 @@ export interface AppState {
   verifications: CleanupVerification[]
   notifications: Notification[]
   hotspots: Hotspot[]
+  categories: WasteCategoryConfig[]
   auditLogs: AuditLog[]
   version: number
 }
@@ -186,6 +197,7 @@ export interface NewReportInput {
   address: string
   description: string
   mediaUrl: string
+  mediaType?: 'image' | 'video'
   capturedAt: string
   analysis: AIAnalysis
   sensitivity: SensitivityLevel

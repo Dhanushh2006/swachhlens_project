@@ -19,6 +19,7 @@ hotspots (derived operational intelligence)
 All required entities are implemented. Additions:
 
 - `team_members` creates enforceable worker assignment scope.
+- `waste_categories` supports audited activation and handling guidance from the Admin console.
 - `incident_status_events` persists every workflow transition.
 - `incidents.display_id` separates public civic references (`SW-2048`) from UUID keys.
 - `score_factors` preserves explainability instead of only the final score.

@@ -10,14 +10,14 @@ This is not a normal complaint form. A report becomes a waste classification, ap
 
 ## What works
 
-- **Citizen mobile app:** camera/upload, location consent and fallback, timestamp, comments, deterministic/Edge Function analysis, report review, persistent submission and tracking.
+- **Citizen mobile app:** photo/video capture or upload, location consent and fallback, timestamp, comments, deterministic/Edge Function analysis, report review, persistent submission and tracking.
 - **WasteVision:** all eight required categories, confidence, approximate Small–Very Large volume, hazard flags and technically defensible prototype labels.
 - **Duplicate Intelligence:** configurable 150 m / 72 h comparison, category matching and pluggable visual-similarity adapter; consolidated master incidents are persisted.
 - **ActionScore™:** centralized 0–100 formula with visible factor contributions—volume, location sensitivity, report frequency, age, and hazard/context.
 - **ResponseMatch™:** recommends team type, vehicle, crew size, escalation and a human-readable reason.
 - **Municipal Command Center:** database-derived KPIs, ranked queue, detailed decision view, Leaflet map, clusters, resources, hotspots and operational charts.
 - **Field workflow:** assignment acceptance, travel, on-site and cleanup transitions; invalid skips are rejected; after-photo verification closes the loop.
-- **Role experiences:** Citizen, Municipal Officer, Field Worker, Administrator and Recycling Partner.
+- **Role experiences:** Citizen, Municipal Officer, Field Worker, Administrator and Recycling Partner. Admin controls persist user roles, team/vehicle availability and category activation with audit records.
 - **Security foundation:** Supabase Auth, protected routes, PostgreSQL RLS, protected Storage buckets, transactional RPCs and audit records.
 - **Reliable demo mode:** 20 fictional incidents in IndexedDB, generated demo imagery, five teams, five vehicles, clusters, hotspots and reproducible scenarios. No external service is required.
 
@@ -121,7 +121,7 @@ npm run preview   # production preview
 
 ## Data and security
 
-The schema includes every required table plus `team_members` and `incident_status_events`, with foreign keys and operational indexes. RLS restricts citizens to their reports, field workers to assigned work, recyclers to recyclable-heavy incidents, and operations roles to municipal scope. The backend status trigger rejects invalid transitions. See [docs/database.md](docs/database.md).
+The schema includes every required table plus `team_members`, `incident_status_events` and governed `waste_categories`, with foreign keys and operational indexes. RLS restricts citizens to their reports, field workers to assigned work, recyclers to recyclable-heavy incidents, and operations roles to municipal scope. The backend status trigger rejects invalid transitions. See [docs/database.md](docs/database.md).
 
 ## Privacy
 

@@ -26,15 +26,16 @@ const responseFrom = (value: Record<string,unknown> = {}) => ({
 
 export async function loadSupabaseState(): Promise<AppState> {
   const db = client()
-  const [incidentResult, teamResult, vehicleResult, assignmentResult, clusterResult, memberResult, verificationResult, notificationResult, hotspotResult, auditResult] = await Promise.all([
+  const [profileResult, incidentResult, teamResult, vehicleResult, assignmentResult, clusterResult, memberResult, verificationResult, notificationResult, hotspotResult, categoryResult, auditResult] = await Promise.all([
+    db.from('profiles').select('id,full_name,email,phone,role,avatar_url,created_at').order('created_at'),
     db.from('incidents').select('*, ai_analyses(*), incident_media(*), incident_status_events(*)').order('created_at',{ascending:false}).limit(200),
     db.from('teams').select('*').order('name'), db.from('vehicles').select('*').order('name'),
     db.from('assignments').select('*').order('assigned_at',{ascending:false}), db.from('duplicate_clusters').select('*').order('created_at',{ascending:false}),
     db.from('duplicate_cluster_members').select('*'), db.from('cleanup_verifications').select('*').order('created_at',{ascending:false}),
     db.from('notifications').select('*').order('created_at',{ascending:false}).limit(100), db.from('hotspots').select('*').order('risk_score',{ascending:false}),
-    db.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(100),
+    db.from('waste_categories').select('*').order('sort_order'), db.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(100),
   ])
-  const firstError = [incidentResult,teamResult,vehicleResult,assignmentResult,clusterResult,memberResult,verificationResult,notificationResult,hotspotResult,auditResult].find(result=>result.error)?.error
+  const firstError = [profileResult,incidentResult,teamResult,vehicleResult,assignmentResult,clusterResult,memberResult,verificationResult,notificationResult,hotspotResult,categoryResult,auditResult].find(result=>result.error)?.error
   if (firstError) throw new Error(firstError.message)
   const assignmentsRaw = assignmentResult.data ?? []
   const mediaPaths = (incidentResult.data ?? []).flatMap((raw:any)=>(raw.incident_media??[]).map((media:any)=>media.storage_path)).filter(Boolean)
@@ -64,6 +65,7 @@ export async function loadSupabaseState(): Promise<AppState> {
   })
   const backendToDisplay = new Map((incidentResult.data??[]).map((raw:any)=>[raw.id,raw.display_id]))
   return {
+    profiles:(profileResult.data??[]).map((raw:any)=>({id:raw.id,fullName:raw.full_name,email:raw.email,phone:raw.phone??undefined,role:raw.role,avatarUrl:raw.avatar_url??undefined,createdAt:raw.created_at})),
     incidents,
     teams:(teamResult.data??[]).map((raw:any)=>({id:raw.id,name:raw.name,teamType:raw.team_type,workerCount:raw.worker_count,availability:raw.availability,currentLocation:raw.current_location??{latitude:0,longitude:0}})),
     vehicles:(vehicleResult.data??[]).map((raw:any)=>({id:raw.id,name:raw.name,vehicleType:raw.vehicle_type,capacity:raw.capacity,availability:raw.availability,currentLocation:raw.current_location??{latitude:0,longitude:0}})),
@@ -72,14 +74,18 @@ export async function loadSupabaseState(): Promise<AppState> {
     verifications:(verificationResult.data??[]).map((raw:any)=>({id:raw.id,incidentId:backendToDisplay.get(raw.incident_id)??raw.incident_id,afterMediaPath:cleanupSignedUrls.get(raw.after_media_path)??raw.after_media_path,verificationStatus:raw.verification_status,confidence:Number(raw.confidence),remainingWasteIndicator:raw.remaining_waste_indicator,createdAt:raw.created_at})),
     notifications:(notificationResult.data??[]).map((raw:any)=>({id:raw.id,userId:raw.user_id,title:raw.title,message:raw.message,type:raw.type,read:raw.read,createdAt:raw.created_at})),
     hotspots:(hotspotResult.data??[]).map((raw:any)=>({id:raw.id,name:raw.name,centerLatitude:raw.center_latitude,centerLongitude:raw.center_longitude,riskScore:raw.risk_score,reportCount:raw.report_count,trend:Number(raw.trend),dominantCategory:raw.dominant_category,averageResolutionTime:Number(raw.average_resolution_time),signal:raw.signal,recommendation:raw.recommendation})),
-    auditLogs:(auditResult.data??[]).map((raw:any)=>({id:raw.id,userId:raw.user_id,action:raw.action,entityType:raw.entity_type,entityId:raw.entity_id,metadata:raw.metadata,createdAt:raw.created_at})),version:1,
+    categories:(categoryResult.data??[]).map((raw:any)=>({id:raw.id,name:raw.name,active:raw.active,handlingNotes:raw.handling_notes,sortOrder:raw.sort_order})),
+    auditLogs:(auditResult.data??[]).map((raw:any)=>({id:raw.id,userId:raw.user_id,action:raw.action,entityType:raw.entity_type,entityId:raw.entity_id,metadata:raw.metadata,createdAt:raw.created_at})),version:3,
   }
 }
 
 async function uploadDataUrl(bucket:string,path:string,url:string){if(!url.startsWith('data:')&&!url.startsWith('/'))return url;const blob=await (await fetch(url)).blob();const {error}=await client().storage.from(bucket).upload(path,blob,{contentType:blob.type||'image/jpeg',upsert:false});if(error)throw new Error(error.message);return path}
 
-export async function submitSupabaseReport(input:NewReportInput){const db=client();const {data:{user}}=await db.auth.getUser();if(!user)throw new Error('Sign in before submitting a report.');const mediaPath=await uploadDataUrl('incident-media',`${user.id}/${crypto.randomUUID()}.jpg`,input.mediaUrl);const {data,error}=await db.functions.invoke('submit-report',{body:{...input,mediaPath}});if(error)throw new Error(error.message);return data as {displayId:string}}
+export async function submitSupabaseReport(input:NewReportInput){const db=client();const {data:{user}}=await db.auth.getUser();if(!user)throw new Error('Sign in before submitting a report.');const extension=input.mediaType==='video'?(input.mediaUrl.startsWith('data:video/webm')?'.webm':'.mp4'):'.jpg';const mediaPath=await uploadDataUrl('incident-media',`${user.id}/${crypto.randomUUID()}${extension}`,input.mediaUrl);const {data,error}=await db.functions.invoke('submit-report',{body:{...input,mediaPath}});if(error)throw new Error(error.message);return data as {displayId:string}}
 export async function assignSupabaseIncident(backendId:string,teamId:string,vehicleId:string){const {error}=await client().rpc('assign_response',{target_incident:backendId,target_team:teamId,target_vehicle:vehicleId});if(error)throw new Error(error.message)}
 export async function transitionSupabaseIncident(backendId:string,status:IncidentStatus,note?:string){const {error}=await client().rpc('advance_incident_status',{target_incident:backendId,target_status:status,transition_note:note??null});if(error)throw new Error(error.message)}
 export async function verifySupabaseCleanup(backendId:string,imageName:string,imageUrl:string){const db=client();const path=await uploadDataUrl('cleanup-evidence',`${backendId}/${crypto.randomUUID()}.jpg`,imageUrl);const {data,error}=await db.functions.invoke('verify-cleanup',{body:{incidentId:backendId,afterMediaPath:path,imageName}});if(error)throw new Error(error.message);return { ...(data as CleanupVerification), afterMediaPath: imageUrl }}
 export async function readSupabaseNotification(id:string){const {error}=await client().from('notifications').update({read:true}).eq('id',id);if(error)throw new Error(error.message)}
+export async function updateSupabaseResource(table:'teams'|'vehicles',id:string,availability:string){const {error}=await client().from(table).update({availability}).eq('id',id);if(error)throw new Error(error.message)}
+export async function updateSupabaseCategory(id:string,active:boolean){const {error}=await client().from('waste_categories').update({active}).eq('id',id);if(error)throw new Error(error.message)}
+export async function updateSupabaseUserRole(id:string,role:string){const {error}=await client().from('profiles').update({role}).eq('id',id);if(error)throw new Error(error.message)}
