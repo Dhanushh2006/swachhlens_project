@@ -1,0 +1,1 @@
+import{t as e,u as t}from"./utils-BoW7YqM-.js";var n=t();function r({url:t,type:r=`image`,className:i,alt:a=`Incident evidence`,controls:o=!1}){return r===`video`?(0,n.jsx)(`video`,{src:t,className:e(`bg-slate-900 object-cover`,i),controls:o,muted:!o,playsInline:!0,preload:`metadata`,"aria-label":a}):(0,n.jsx)(`img`,{src:t,className:e(`object-cover`,i),alt:a})}export{r as t};

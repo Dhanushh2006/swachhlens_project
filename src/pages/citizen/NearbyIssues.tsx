@@ -1,0 +1,6 @@
+import { MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { PriorityBadge } from '../../components/ui/Badge'
+import { useData } from '../../context/DataContext'
+
+export function NearbyIssues(){const {incidents}=useData();const active=incidents.filter(i=>i.status!=='RESOLVED').slice(0,6);return <div className="px-4 py-6 sm:px-6"><p className="eyebrow">Public incident context</p><h1 className="mt-1 text-2xl font-black">Nearby issues</h1><p className="mt-2 text-sm leading-6 text-slate-500">Approximate locations only. Citizen identities and protected media are never displayed publicly.</p><div className="mt-6 overflow-hidden rounded-2xl bg-forest-800 p-5 text-white"><MapPin/><p className="mt-5 text-3xl font-black">{active.length}</p><p className="text-sm text-forest-100">active demo incidents near this area</p></div><div className="mt-5 space-y-3">{active.map(i=><Link to={`/app/reports/${i.id}`} key={i.id} className="card flex items-center gap-3 rounded-xl p-3"><div className="grid h-12 w-12 place-items-center rounded-xl bg-slate-100 text-sm font-black text-forest-700">{i.actionScore}</div><div className="min-w-0 flex-1"><b className="text-sm">{i.wasteCategory}</b><p className="mt-1 truncate text-xs text-slate-500">{i.address}</p></div><PriorityBadge priority={i.priorityLevel}/></Link>)}</div></div>}
